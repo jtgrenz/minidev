@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+puts "Dev Debug Mode"
+puts
+
+Encoding.default_external = Encoding::UTF_8
+Encoding.default_internal = Encoding::UTF_8
+
+unshift_path = ->(path) {
+  p = File.expand_path("../../#{path}", File.realpath(__FILE__))
+  p = File.symlink?(p) ? File.readlink(p) : p
+  $LOAD_PATH.unshift(p) unless $LOAD_PATH.include?(p)
+}
+unshift_path.call('vendor/deps/cli-ui/lib')
+unshift_path.call('vendor/deps/cli-kit/lib')
+unshift_path.call('lib')
+
+require('dev')
+require('pry')
+
+exit(Dev::ErrorHandler.call do
+  Dev::EntryPoint.call(ARGV.dup)
+end)

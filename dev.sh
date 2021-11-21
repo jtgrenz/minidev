@@ -12,7 +12,11 @@ dev() {
   exec 8<"${tmp}"
   rm -f "${tmp}"
 
-  "${__minidev_source_dir}/bin/dev" "$@"
+  if [[ $DEV_DEBUG = 1 ]]; then
+   "${__minidev_source_dir}/bin/dev-dev" "$@"
+  else
+    "${__minidev_source_dir}/bin/dev" "$@"
+  fi
   ret=$?
 
   while read -r finalizer; do
