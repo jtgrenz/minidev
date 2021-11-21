@@ -19,6 +19,7 @@ module Dev
   autoload(:Project,            'dev/project')
 
   autocall(:Config)  { CLI::Kit::Config.new(tool_name: TOOL_NAME) }
+  PROJECTS_PATH = Dev::Config.get('default', 'src_dir') || '~/src'
   autocall(:Command) { CLI::Kit::BaseCommand }
 
   autocall(:Executor) { CLI::Kit::Executor.new(log_file: LOG_FILE) }
