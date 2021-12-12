@@ -6,37 +6,47 @@ module Dev
       basename = RUBY_PLATFORM =~ /darwin/ ? 'fzy_darwin' : 'fzy_linux'
       File.expand_path("vendor/#{basename}", ROOT)
     end
-    GITHUB_ROOT = '~/src/github.com'
-
     class Cd < Dev::Command
       def call(args, _name)
         raise(Abort, 'one arg required') unless args.size == 1
         arg = args.first
-        scores, stat = CLI::Kit::System.capture2(FZY, '--show-matches', arg, stdin_data: avail.join("\n"))
+        scores, stat = CLI::Kit::System.capture2(FZY, '--show-matches', arg, stdin_data: repos.join("\n"))
         raise(Abort, 'fzy failed') unless stat.success?
-
-        target = File.expand_path(File.join(GITHUB_ROOT, scores.lines.first))
+        target = scores.lines.first
         IO.new(9).puts("chdir:#{target}")
       end
 
-      def avail
-        owners = Dir.entries(File.expand_path(GITHUB_ROOT)) - %w(. ..)
-        owners = owners.select do |f|
-          File.directory?(File.join(File.expand_path(GITHUB_ROOT), f))
-        end
+      def repos
+        # Src directory should follow a tree format of source_host > owner > repo
+        # ie ~/src/some-host.com/an-organization/a-repo
 
-        owners.flat_map do |owner|
-          repos = Dir.entries(File.expand_path(File.join(GITHUB_ROOT, owner))) - %w(. ..)
-          repos = repos.select do |f|
-            File.directory?(File.join(File.expand_path(File.join(GITHUB_ROOT, owner)), f))
-          end
+        hosts = absolute_subdirectories(src)
 
-          repos.map { |r| File.join(owner, r) }
-        end
+        orgs = hosts.map do |host|
+          absolute_subdirectories(host)
+        end.flatten
+
+        repos = orgs.map do |org|
+          absolute_subdirectories(org)
+        end.flatten
+
+        repos
       end
 
       def self.help
         'TODO'
+      end
+
+      private
+
+      def src
+        File.expand_path(Dev::Config.projects_path)
+      end
+
+      def absolute_subdirectories(path)
+        Dir.children(path)
+        .map { |entry| File.join(path, entry) }
+        .select { |entry| File.directory?(entry) }
       end
     end
   end
