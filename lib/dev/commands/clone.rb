@@ -26,7 +26,7 @@ module Dev
         end
 
         def target
-          File.expand_path(File.join(PROJECTS_PATH, git_provider, repo))
+          File.expand_path(File.join(Dev::Config.projects_path, git_provider, repo))
         end
 
         def clone

@@ -17,9 +17,9 @@ module Dev
   autoload(:Commands,           'dev/commands')
   autoload(:ContextualResolver, 'dev/contextual_resolver')
   autoload(:Project,            'dev/project')
+  autoload(:Config,             'dev/support/config')
 
-  autocall(:Config)  { CLI::Kit::Config.new(tool_name: TOOL_NAME) }
-  PROJECTS_PATH = Dev::Config.get('default', 'src_dir') || '~/src'
+  autocall(:Config)  { Dev::Support::Config.new(tool_name: TOOL_NAME) }
   autocall(:Command) { CLI::Kit::BaseCommand }
 
   autocall(:Executor) { CLI::Kit::Executor.new(log_file: LOG_FILE) }
